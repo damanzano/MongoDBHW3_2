@@ -25,6 +25,8 @@ import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 import com.sun.org.apache.bcel.internal.generic.ACONST_NULL;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class BlogPostDAO {
@@ -39,8 +41,10 @@ public class BlogPostDAO {
 
         DBObject post = null;
         // XXX HW 3.2,  Work Here
-
-
+        DBCursor posts = postsCollection.find(new BasicDBObject("permalink",permalink));
+        if (posts.hasNext()){
+            post = posts.next();
+        }
 
         return post;
     }
@@ -52,6 +56,8 @@ public class BlogPostDAO {
         List<DBObject> posts = null;
         // XXX HW 3.2,  Work Here
         // Return a list of DBObjects, each one a post from the posts collection
+        DBCursor postCursor= postsCollection.find().sort(new BasicDBObject("date",-1)).limit(limit);
+        posts= postCursor.toArray();
 
         return posts;
     }
@@ -78,7 +84,16 @@ public class BlogPostDAO {
         // - we created the permalink for you above.
 
         // Build the post object and insert it
-
+        List comments = new ArrayList();
+        post.append("title", title);
+        post.append("author", username);
+        post.append("body", body);
+        post.append("permalink", permalink);
+        post.append("tags", tags);
+        post.append("comments", comments);
+        post.append("date", new Date());
+        
+        postsCollection.insert(post);
 
         return permalink;
     }
